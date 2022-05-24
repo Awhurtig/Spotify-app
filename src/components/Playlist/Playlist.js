@@ -1,9 +1,10 @@
 import React from "react";
-import { Box, Avatar, Typography } from "@mui/material";
+import { Avatar, Box, Typography } from "@mui/material";
+import SongTable from "../SongTable/SongTable";
 
-const Playlist = () => {
+const Playlist = ({ songs }) => {
   return (
-    <Box sx={{ bgcolor: "Background.paper", flex: 1, overflowY: "auto" }}>
+    <Box sx={{ bgcolor: "background.paper", flex: 1, overflowY: "auto" }}>
       <Box
         p={{ xs: 3, md: 4 }}
         sx={{
@@ -12,7 +13,7 @@ const Playlist = () => {
             "linear-gradient(0deg, rgba(17,38,25,1) 0%, rgba(24,115,38,1) 100%);",
           display: "flex",
           justifyContent: "flex-start",
-          alignItems: { xs: "flex-start", md: "flex-end", xl: "center" },
+          aignItems: { xs: "flex-start", md: "flex-end", xl: "center" },
           gap: 3,
           boxSizing: "border-box",
           flexDirection: { xs: "column", md: "row" },
@@ -21,7 +22,7 @@ const Playlist = () => {
         <Avatar
           src="/image/bieber.jpg"
           variant="square"
-          alt="HansFilip96"
+          alt="Bieber"
           sx={{
             boxShadow: 15,
             width: { sx: "100%", md: 235 },
@@ -33,10 +34,11 @@ const Playlist = () => {
             Playlist
           </Typography>
           <Typography sx={{ fontSize: { xs: 42, md: 72 }, fontWeight: "bold" }}>
-            Cold Life
+            Code life
           </Typography>
         </Box>
       </Box>
+      <SongTable songs={songs} />
     </Box>
   );
 };

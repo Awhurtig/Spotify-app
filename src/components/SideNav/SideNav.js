@@ -6,15 +6,17 @@ import NavItem from "../NavItem/NavItem";
 import NavPlaylist from "../NavPlaylist/NavPlaylist";
 
 const SideNav = ({ playlists }) => {
-  const renderPlaylists = (second) => {
+  const renderPlaylists = () => {
     return playlists.map((playlist, i) => (
       <NavPlaylist {...playlist} key={i} />
     ));
   };
+
   return (
     <Box
       sx={{
-        bgcolor: "Background.default",
+        overflow: "scroll",
+        bgcolor: "background.default",
         width: 230,
         height: "100%",
         display: { xs: "none", md: "flex" },
@@ -22,14 +24,21 @@ const SideNav = ({ playlists }) => {
       }}
     >
       <Box p={3}>
-        <img src="/image/Spotify_Logo-1.png" width={"75%"} alt="Spotify" />
+        <img src="image/Spotify_Logo-1.png" width={"75%"} alt="Spotify" />
       </Box>
       <NavItem name="Home" Icon={HomeRoundedIcon} target="/" active />
-      <NavItem name="search" Icon={SearchRoundedIcon} target="/Search" />
+      <NavItem name="Search" Icon={SearchRoundedIcon} target="/search" />
       <Box px={3} py={1}>
-        <Divider sx={{ bgcolor: "#ffffff40" }} />
+        <Divider sx={{ backgroundColor: "#ffffff40" }} />
       </Box>
-      <Box sx={{ overflowY: "auto", flex: 1 }}>{renderPlaylists()}</Box>
+      <Box sx={{ overflowY: "auto", flex: 1 }}>
+        {renderPlaylists()}
+        {renderPlaylists()}
+        {renderPlaylists()}
+        {renderPlaylists()}
+        {renderPlaylists()}
+        {renderPlaylists()}
+      </Box>
     </Box>
   );
 };
