@@ -1,11 +1,12 @@
 import React from "react";
 import PlayListItem from "../PlayListItem/PlayListItem";
 import { Box, List, Typography } from "@mui/material";
+import { connect } from "react-redux";
 
 const Library = ({ playlists, loading }) => {
   const renderPlaylistItems = () => {
     if (loading)
-      return [1, 2, 3, 4, 5, 6, 7, 8, 9].map((playlist, i) => (
+      return [1, 2, 3, 4, 5, 6, 7].map((playlist, i) => (
         <PlayListItem key={i} loading={true} />
       ));
 
@@ -39,4 +40,11 @@ const Library = ({ playlists, loading }) => {
   );
 };
 
-export default Library;
+const mapState = (state) => {
+  return {
+    playlist: state.playlist.item,
+    loading: state.playlist.loading,
+  };
+};
+
+export default connect(mapState)(Library);

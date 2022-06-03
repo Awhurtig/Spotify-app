@@ -8,105 +8,58 @@ import Player from "../Player/Player";
 import Home from "../Home/Home";
 import Library from "../Library/Library";
 import Login from "../Login/Login";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import SpotifyWebApi from "spotify-web-api-node";
-import { fetchUser, fetchPlaylist } from "../../store/actions/index";
+import { fetchUser, fetchPlaylist, addDevice } from "../../store/actions/index";
+import Search from "../Search/Search";
 
-const mockData = [
-  { name: "Rock", playlistId: 123, image: "/Justin-Bieber.png" },
-  { name: "Pop", playlistId: 646, image: "/Justin-Bieber.png" },
-  { name: "Hip hop", playlistId: 834, image: "/Justin-Bieber.png" },
-  { name: "X-mas", playlistId: 5503, image: "/Justin-Bieber.png" },
-  { name: "Code life", playlistId: 4832, image: "/Justin-Bieber.png" },
-];
-
-const songs = [
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 180,
-  },
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 180,
-  },
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 155,
-  },
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 180,
-  },
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 180,
-  },
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 180,
-  },
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 173,
-  },
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 180,
-  },
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 180,
-  },
-  {
-    image: "/image/bieber.jpg",
-    title: "Holy",
-    artist: "Justin Bieber",
-    album: "No clue",
-    duration: 180,
-  },
-];
-
-function App({ token, fetchUser, fetchPlaylist }) {
-  const spotifyApi = new SpotifyWebApi();
+function App({ token, fetchUser, fetchPlaylist, spotifyApi, addDevice }) {
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
 
   useEffect(() => {
-    spotifyApi.setAccessToken(token);
-
     const getData = async () => {
       fetchUser(spotifyApi);
       fetchPlaylist(spotifyApi);
     };
 
-    if (token) getData();
+    if (token) {
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        setupSpotifyConnect(token, addDevice);
+      };
+      getData();
+    }
   }, [token, fetchUser]);
+
+  const setupSpotifyConnect = (token, addDevice) => {
+    const player = new window.Spotify.Player({
+      name: "Spotify Clone",
+      getOAuthToken: (cb) => cb(token),
+      volume: 0.5,
+    });
+
+    player.addListener("ready", ({ device_id }) => {
+      addDevice(device_id);
+      setIsPlayerReady(true);
+    });
+
+    player.addListener("not_ready", ({ device_id }) => {
+      console.log("Device ID has gone offline", device_id);
+    });
+
+    player.addListener("initialization_error", ({ message }) => {
+      console.error(message);
+    });
+
+    player.addListener("authentication_error", ({ message }) => {
+      console.error(message);
+    });
+
+    player.addListener("account_error", ({ message }) => {
+      console.error(message);
+    });
+
+    player.connect();
+  };
 
   return (
     <Box className="App">
@@ -120,30 +73,27 @@ function App({ token, fetchUser, fetchPlaylist }) {
           }}
         >
           <Box sx={{ flex: 1, overflowY: "auto", display: "flex" }}>
-            <SideNav playlists={mockData} />
+            <SideNav />
             <Routes>
               <Route
                 path="/playlist/:id"
-                element={<Playlist songs={songs} />}
+                element={<Playlist spotifyApi={spotifyApi} />}
               />
               <Route
                 path="/search"
-                element={<h1 style={{ color: "white" }}>Search</h1>}
+                element={<Search spotifyApi={spotifyApi} />}
               />
-              <Route
-                path="/library"
-                element={<Library playlists={mockData} loading={false} />}
-              />
+              <Route path="/library" element={<Library />} />
               <Route path="/" element={<Home />} />
             </Routes>
           </Box>
-          <Player />
+          {isPlayerReady && <Player spotifyApi={spotifyApi} />}
           <MobilNav />
           <Banner />
         </Box>
       ) : (
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="*" element={<Login />} />
         </Routes>
       )}
     </Box>
@@ -165,7 +115,7 @@ const Banner = () => {
         paddingRight: "10px",
       }}
     >
-      Made with love by Techover Academy
+      Made with love by Hassan
     </Box>
   );
 };
@@ -178,6 +128,7 @@ const mapDispatch = (dispatch) => {
   return {
     fetchUser: (api) => dispatch(fetchUser(api)),
     fetchPlaylist: (api) => dispatch(fetchPlaylist(api)),
+    addDevice: (id) => dispatch(addDevice(id)),
   };
 };
 
