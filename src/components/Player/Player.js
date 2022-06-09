@@ -5,8 +5,18 @@ import PlayerControlls from "../PlayerControlls/PlayerControlls";
 import VolumeControlls from "../VolumeControlls/VolumeControlls";
 import { connect } from "react-redux";
 import { updateSongInfoStart } from "../../store/actions";
+import PlayerOverlay from "../PlayerOverlay/PlayerOverlay";
+import { openOverlay } from "../../store/actions/index";
 
-const Player = ({ spotifyApi, updateSongInfoStart, title, artist, image }) => {
+const Player = ({
+  spotifyApi,
+  updateSongInfoStart,
+  title,
+  artist,
+  image,
+  openOverlay,
+  playerOverlayOpen,
+}) => {
   const sliderStyle = {
     color: "#fff",
     height: 4,
@@ -43,25 +53,33 @@ const Player = ({ spotifyApi, updateSongInfoStart, title, artist, image }) => {
     updateSongInfoStart(spotifyApi);
   }, []);
 
+  const handleOpenOverlay = () => {
+    if (!playerOverlayOpen) {
+      // playerOverlayOpen === true --> då vill vi inte kalla openOverlay()
+      openOverlay();
+    }
+  };
+
   return (
-    <Box>
+    <Box onClick={handleOpenOverlay}>
       <Grid
         container
         px={3}
         sx={{
           bgcolor: "Background.paper",
-          height: 80,
+          height: 100,
           width: "100%",
           borderTop: "1px solid #292929",
         }}
       >
         <Grid
           item
-          xs={3}
+          xs={12}
+          md={3}
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-start",
           }}
         >
           <Avatar
@@ -79,21 +97,33 @@ const Player = ({ spotifyApi, updateSongInfoStart, title, artist, image }) => {
             </Typography>
           </Box>
         </Grid>
-        <PlayerControlls sliderStyle={sliderStyle} spotifyApi={spotifyApi} />
+        <Grid
+          item
+          sx={{
+            display: { xs: "none", md: "flex" },
+            flex: 1,
+            justifyContent: { xs: "flex-end", md: "center" },
+            alignItems: "center",
+          }}
+        >
+          <PlayerControlls sliderStyle={sliderStyle} spotifyApi={spotifyApi} />
+        </Grid>
         <VolumeControlls sliderStyle={sliderStyle} spotifyApi={spotifyApi} />
       </Grid>
+      <PlayerOverlay sliderStyle={sliderStyle} spotifyApi={spotifyApi} />
     </Box>
   );
 };
 
 const mapState = (state) => {
-  const { title, artist, image } = state.player;
-  return { title, artist, image };
+  const { title, artist, image, playerOverlayOpen } = state.player;
+  return { title, artist, image, playerOverlayOpen };
 };
 
 const mapDispatch = (dispatch) => {
   return {
     updateSongInfoStart: (api) => dispatch(updateSongInfoStart(api)),
+    openOverlay: () => dispatch(openOverlay()),
   };
 };
 
